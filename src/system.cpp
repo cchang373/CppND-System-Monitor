@@ -12,11 +12,7 @@
 #include "process.h"
 #include "processor.h"
 
-using std::ifstream;
-using std::set;
-using std::size_t;
-using std::string;
-using std::vector;
+using namespace std;
 using namespace LinuxParser;
 /*You need to complete the mentioned TODOs in order to satisfy the rubric
 criteria "The student will be able to extract and display basic data about the
@@ -30,9 +26,9 @@ Processor& System::Cpu() { return cpu_; }
 
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
-  vector<int> pids = LinuxParser::Pids();
+  const vector<int>& pids = LinuxParser::Pids();
   processes_.clear();
-  for (int pid : pids) {
+  for (const int& pid : pids) {
     Process process(pid);
     processes_.push_back(process);
   }

@@ -78,10 +78,10 @@ float LinuxParser::MemoryUtilization() {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
-        if (key == "MemTotal") {
+        if (key == "MemTotal:") {
           mem_total = std::stof(value);
         }
-        else if (key == "MemFree") {
+        else if (key == "MemFree:") {
           mem_free = std::stof(value);
         }
       }
@@ -125,9 +125,9 @@ long LinuxParser::ActiveJiffies() {
     linestream >> key >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
     if (key == "cpu") {
       active_jiffies = stol(user) + stol(nice) + stol(system) + stol(irq) + stol(softirq) + stol(steal) + stol(idle) + stol(iowait) + stol(guest) + stol(guest_nice);
-      return active_jiffies / sysconf(_SC_CLK_TCK);
          }
   }
+  return active_jiffies / sysconf(_SC_CLK_TCK);
 }
 
 // TODO: Read and return the number of idle jiffies for the system
@@ -143,9 +143,9 @@ long LinuxParser::IdleJiffies() {
     linestream >> key >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
     if (key == "cpu") {
       idle_jiffies = stol(idle) + stol(iowait);
-      return idle_jiffies / sysconf(_SC_CLK_TCK);
          }
   }
+  return idle_jiffies / sysconf(_SC_CLK_TCK);
  }
 
 // TODO: Read and return CPU utilization
@@ -185,6 +185,7 @@ int LinuxParser::TotalProcesses() {
       }
     }
   }
+  return std::stoi(value);
 }
 
 // TODO: Read and return the number of running processes
@@ -203,6 +204,7 @@ int LinuxParser::RunningProcesses() {
       }
     }
   }
+  return std::stoi(value);
 }
 
 // TODO: Read and return the command associated with a process
@@ -229,7 +231,7 @@ string LinuxParser::Ram(int pid) {
     while (std::getline(filestream, line)){
       std::istringstream linestream(line);
       if (linestream >> s >> mem) {
-        if (s == "VmSize:") {
+        if (s == "VmRSS:") { //using VmRSS instead of VmSize
           break;
         }
       }
@@ -243,14 +245,14 @@ string LinuxParser::Ram(int pid) {
 string LinuxParser::Uid(int pid) {
   string line;
   string s, value;
-  string path = kProcDirectory + to_string(pid) + kStatFilename;
+  string path = kProcDirectory + to_string(pid) + kStatusFilename;
   std::ifstream filestream(path);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
       if (linestream >> s >> value) {
         if (s == "Uid:") {
-          break;
+          return value;
         }
       }
     }
@@ -268,11 +270,10 @@ string LinuxParser::User(int pid) {
     while (std::getline(filestream, line)) {
       std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
-      if (linestream >> key >> x >> value) {
-        if (value == Uid(pid)) {
-          break;
+      linestream >> key >> x >> value;
+      if (value == Uid(pid)) {
+          return key;
         }
-      }
     }
   }
   return key;
