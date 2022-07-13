@@ -9,7 +9,7 @@ using namespace LinuxParser;
 using std::stof;
 using std::string;
 
-// TODO: Return the aggregate CPU utilization
+// Return the aggregate CPU utilization
 float Processor::Utilization() {
   string line;
   string key;
